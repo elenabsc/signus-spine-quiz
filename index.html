@@ -1,0 +1,269 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>SIGNUS SPINE CAMPUS Quiz</title>
+  <style>
+    body {
+      font-family: roboto, sans-serif;
+      background: #b51d28;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 18px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .station {
+      font-weight: bold;
+      margin-top: 30px;
+      font-size: 1.3em;
+    }
+
+    .question {
+      margin: 20px 0;
+      font-size: 1.2em;
+    }
+
+    .option {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      background: white;
+      color: #b51d28;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1em;
+      max-width: 300px;
+    }
+
+    .option:hover {
+      background: #f5f5f5;
+    }
+
+    .option.selected {
+      border-color: yellow;
+    }
+
+    button#nextBtn {
+      margin-top: 20px;
+      padding: 10px 30px;
+      background: white;
+      color: #b51d28;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+
+    #startBtn {
+      background: white;
+      color: #b51d28;
+      font-size: 1.2em;
+      padding: 15px 30px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    #score-feedback {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    form#feedback-poll {
+      margin-top: 20px;
+    }
+
+    #thanks-message {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #ffd700;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Welcome to the SIGNUS SPINE CAMPUS Quiz</h1>
+  <p>Test your spine knowledge with 8 fun and engaging questions!</p>
+  <button id="startBtn">Start Quiz</button>
+
+  <div id="quiz-container" class="hidden">
+    <div class="station" id="station-title"></div>
+    <div class="question" id="question-text"></div>
+    <div id="options-container"></div>
+    <button id="nextBtn" disabled>Next</button>
+  </div>
+
+  <div id="result-container" class="hidden">
+    <h2>Quiz Complete!</h2>
+    <p>Your Score: <span id="score"></span>/8</p>
+    <p id="score-feedback"></p>
+
+    <form id="feedback-poll">
+      <h3>How did you like this quiz?</h3>
+      <label><input type="radio" name="feedback" value="loved it" required> Loved it!</label><br>
+      <label><input type="radio" name="feedback" value="it was ok"> It was OK</label><br>
+      <label><input type="radio" name="feedback" value="not great"> Not great</label><br>
+      <button type="submit">Send Feedback</button>
+    </form>
+    <p id="thanks-message" class="hidden">Thanks for your feedback!</p>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        station: "📍 Station 1: The Atlas Affair",
+        question: "I’m the vertebra holding up your head — and never get a thank-you. Who am I?",
+        options: ["Vertebra McShoulder", "Atlas", "The Headstand Champion"],
+        answerText: "Atlas",
+      },
+      {
+        station: "📍 Station 2: The Jelly Diva",
+        question: "I’m soft, round, and when I slip out — chaos ensues. Who am I?",
+        options: ["Jellybean of Doom", "The Drama Disc", "Nucleus pulposus"],
+        answerText: "Nucleus pulposus",
+      },
+      {
+        station: "📍 Station 3: The Mobility Addict",
+        question: "I nod, twist, and tilt your head — and occasionally cause migraines. Who am I?",
+        options: ["Cervical spine", "Migraine Highway", "The Neck Acrobat"],
+        answerText: "Cervical spine",
+      },
+      {
+        station: "📍 Station 4: The Backbone MC",
+        question: "I’ve got processes, discs, and a strong mindset. Who am I?",
+        options: ["The Bone Boss", "The Rib DJ", "The spine"],
+        answerText: "The spine",
+      },
+      {
+        station: "📍 Station 5: The Pointy Rebel",
+        question: "I’m sharp, palpable, and stick out on principle. Who am I?",
+        options: ["Spikezilla", "Spinous process", "The Bone Mohawk"],
+        answerText: "Spinous process",
+      },
+      {
+        station: "📍 Station 6: The Quiet Puller",
+        question: "I keep you upright and pull you long — yet rarely get a surgical shout-out. Who am I?",
+        options: ["The Back Whisperer", "The Stretchinator", "M. erector spinae"],
+        answerText: "M. erector spinae",
+      },
+      {
+        station: "📍 Station 7: The Hip Diplomat",
+        question: "I’m not a vertebra, not a muscle — but without me, movement creaks. Who am I?",
+        options: ["Sacroiliac joint", "The Crack Connector", "The Hip Negotiator"],
+        answerText: "Sacroiliac joint",
+      },
+      {
+        station: "📍 Station 8: The Drama King",
+        question: "I radiate into the leg and love attention when irritated. Who am I?",
+        options: ["The Pain Celebrity", "The Leg Diva", "Sciatic nerve"],
+        answerText: "Sciatic nerve",
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const startBtn = document.getElementById("startBtn");
+    const quizContainer = document.getElementById("quiz-container");
+    const stationTitle = document.getElementById("station-title");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const nextBtn = document.getElementById("nextBtn");
+    const resultContainer = document.getElementById("result-container");
+    const scoreText = document.getElementById("score");
+    const scoreFeedback = document.getElementById("score-feedback");
+    const feedbackPoll = document.getElementById("feedback-poll");
+    const thanksMessage = document.getElementById("thanks-message");
+
+    // Shuffle options and fix answer index
+    quizData.forEach(q => {
+      q.options = q.options.sort(() => Math.random() - 0.5);
+      q.answer = q.options.indexOf(q.answerText);
+    });
+
+    startBtn.addEventListener("click", () => {
+      startBtn.classList.add("hidden");
+      quizContainer.classList.remove("hidden");
+      loadQuestion();
+    });
+
+    function loadQuestion() {
+      nextBtn.disabled = true;
+      const q = quizData[currentQuestion];
+      stationTitle.textContent = q.station;
+      questionText.textContent = q.question;
+      optionsContainer.innerHTML = "";
+
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.className = "option";
+        btn.addEventListener("click", () => selectAnswer(i, btn));
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(selectedIndex, btn) {
+      const q = quizData[currentQuestion];
+      const correct = selectedIndex === q.answer;
+
+      // Disable all buttons & show correct/incorrect colors
+      Array.from(optionsContainer.children).forEach((b, i) => {
+        b.disabled = true;
+        if (i === q.answer) b.style.borderColor = "green";
+        else if (i === selectedIndex) b.style.borderColor = "red";
+      });
+
+      btn.classList.add("selected");
+      nextBtn.disabled = false;
+
+      if (correct) {
+        questionText.innerHTML += "<br><br>✅ Correct!";
+        score++;
+      } else {
+        questionText.innerHTML += "<br><br>❌ Oops! That wasn’t right.";
+      }
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function showResults() {
+      quizContainer.classList.add("hidden");
+      resultContainer.classList.remove("hidden");
+      scoreText.textContent = score;
+
+      if (score <= 3) {
+        scoreFeedback.textContent = "Nice try, spine rookie!";
+      } else if (score <= 6) {
+        scoreFeedback.textContent = "Solid foundation!";
+      } else {
+        scoreFeedback.textContent = "You’re a spine star!";
+      }
+    }
+
+    feedbackPoll.addEventListener("submit", (e) => {
+      e.preventDefault();
+      feedbackPoll.classList.add("hidden");
+      thanksMessage.classList.remove("hidden");
+    });
+  </script>
+
+</body>
+
+</html>
